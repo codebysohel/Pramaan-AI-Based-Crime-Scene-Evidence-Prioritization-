@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "pramaan": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "pramaan.mcp_server"],
+      "env": {
+        "PYTHONPATH": "src",
+        "PRAMAAN_MCP_ACTOR": "mcp-client"
+      }
+    },
+    "pramaan-http": {
+      "type": "http",
+      "url": "http://127.0.0.1:8000/mcp"
+    }
+  }
+}

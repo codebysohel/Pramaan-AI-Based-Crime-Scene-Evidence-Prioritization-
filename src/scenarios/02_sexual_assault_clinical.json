@@ -1,0 +1,14 @@
+{
+  "_note": "SYNTHETIC scenario. No survivor identity is recorded anywhere (BNS 2023 s.72). Tests the BNSS s.184 statutory floor, cold chain and custody-deadline logic.",
+  "case_ref": "Cr. No. 512/2026, PS Madhapur (synthetic)",
+  "title": "Sexual assault in a lodge room — clinical and scene exhibits",
+  "crime_type": "sexual_assault",
+  "incident_time": "2026-09-20T23:00:00+05:30",
+  "reference_time": "2026-09-21T15:00:00+05:30",
+  "scene": {"setting": "indoor", "ambient_temp_c": 29, "weather": "humid"},
+  "accused_in_custody": true,
+  "custody_start": "2026-09-21T10:00:00+05:30",
+  "description": "Ex-S1: sexual assault evidence kit (vaginal swabs, smears) collected at the government hospital, kept at room temperature in the ward\nEx-S2: undergarments of the survivor packed in a plastic bag, damp\nEx-S3: bedsheet with suspected semen stains from the lodge room\nEx-S4: used condom recovered from the dustbin of the room\nEx-S5: 3 strands of hair on the pillow\nEx-S6: clothes of the accused seized at the instance of the accused\nEx-S7: mobile phone of the accused\nEx-S8: CCTV of the lodge corridor and reception, not yet seized\nEx-S9: drinking glass on the side table\nEx-S10: blood sample of the accused on FTA card for DNA reference",
+  "photo_captions": ["IMG_0101 Ex-S3 bedsheet in situ", "IMG_0104 Ex-S4 condom in dustbin with scale", "IMG_0107 Ex-S9 glass on side table"],
+  "expect": {"p1_must_include": ["Ex-S1", "Ex-S8"], "flags": {"Ex-S1": "MANDATED_EXAMINATION"}}
+}

@@ -1,0 +1,10 @@
+services:
+  pramaan:
+    build: .
+    ports: ["127.0.0.1:8000:8000"]
+    env_file:
+      - path: src/.env
+        required: false
+    volumes: ["pramaan-data:/data"]
+volumes:
+  pramaan-data:

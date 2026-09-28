@@ -1,0 +1,10 @@
+# Keep IBM Bob out of the evidence store, secrets and build output
+src/runtime/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+audit.jsonl
+.env
+src/.env
+**/.venv/
+**/__pycache__/

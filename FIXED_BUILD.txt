@@ -1,0 +1,25 @@
+PRAMAAN-X ALL-5 MODEL / UI FIXED BUILD
+======================================
+
+Main fix: uploaded photos now reach M2 and M5 even when text reconciliation
+returns NEEDS_REVIEW. Deterministic EPI/FSL triage remains safely gated.
+
+Run from src:
+  C:\Python314\python.exe scripts\verify_ai_wiring.py --image D:\ibm\scene1.jpg --run-m5
+
+Start dashboard:
+  C:\Python314\python.exe -m pramaan serve
+
+Open:
+  http://127.0.0.1:8000
+
+Expected proof after a successful all-five run:
+  M1 INFERENCE_OK
+  M2 INFERENCE_OK
+  M3 INFERENCE_OK
+  M4 INFERENCE_OK
+  M5 INFERENCE_OK
+
+See ALL_5_MODEL_FIXES.md for details.
+
+RESULT PIPELINE PATCH: NEEDS_REVIEW now produces provisional deterministic results; BLOCKED still fails closed; unmatched classified parser candidates are preserved.

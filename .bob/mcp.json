@@ -1,0 +1,48 @@
+{
+  "mcpServers": {
+    "pramaan": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:8000/mcp",
+      "alwaysAllow": [
+        "describe_tool_catalog",
+        "list_crime_profiles",
+        "lookup_evidence_type",
+        "parse_scene_description",
+        "list_cases",
+        "get_case",
+        "explain_item_priority",
+        "simulate_preservation",
+        "build_fsl_schedule",
+        "lab_queue",
+        "gap_analysis",
+        "verify_custody_ledger",
+        "assess_evidence_authenticity",
+        "plan_fsl_network"
+      ],
+      "timeout": 120,
+      "disabled": false
+    },
+    "pramaan-stdio": {
+      "command": "python",
+      "args": [
+        "-m",
+        "pramaan.mcp_server"
+      ],
+      "cwd": "${workspaceFolder}/src",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PRAMAAN_MCP_ACTOR": "ibm-bob"
+      },
+      "alwaysAllow": [
+        "describe_tool_catalog",
+        "list_crime_profiles",
+        "lookup_evidence_type",
+        "parse_scene_description",
+        "get_case",
+        "explain_item_priority"
+      ],
+      "timeout": 120,
+      "disabled": true
+    }
+  }
+}

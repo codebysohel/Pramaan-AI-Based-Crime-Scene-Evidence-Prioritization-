@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pramaan — Evidence Triage</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2316181d'/><path d='M9 23V9h8a5 5 0 010 10h-8' fill='none' stroke='%23d9a441' stroke-width='3'/></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/"><span class="mark">P</span><span class="word">PRAMAAN</span><span class="tag">evidence triage · FSL scheduling · chain of custody</span></a>
+    <div class="status" id="status">connecting…</div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <nav class="nav">
+        <a href="#/new" data-nav="new" class="btn-new">+ New triage</a>
+        <a href="#/lab" data-nav="lab">Lab queue <small>all cases</small></a>
+        <a href="#/network" data-nav="network">FSL network <small>scale-out</small></a>
+        <a href="#/benchmark" data-nav="benchmark">Benchmark <small>200 exhibits</small></a>
+        <a href="#/ai" data-nav="ai">AI control <small>M1–M5 live</small></a>
+        <a href="#/mcp" data-nav="mcp">MCP server <small>tools</small></a>
+      </nav>
+      <div class="side-title">Cases <span id="case-count"></span></div>
+      <ul class="cases" id="cases"></ul>
+    </aside>
+    <main id="main" class="main"><div class="loading">Loading…</div></main>
+  </div>
+  <aside class="drawer" id="drawer" aria-hidden="true"></aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

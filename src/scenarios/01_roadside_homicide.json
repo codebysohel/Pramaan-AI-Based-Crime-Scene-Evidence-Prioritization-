@@ -1,0 +1,19 @@
+{
+  "_note": "SYNTHETIC scenario modelled on the pattern described in the hackathon brief (outdoor roadside scene, burning, scene litter, two-wheeler, toll-plaza CCTV). Not real case data. No victim identity is used, in line with BNS 2023 s.72.",
+  "case_ref": "Cr. No. 784/2026, PS Shamshabad Rural (synthetic)",
+  "title": "Roadside homicide with burning — culvert under service road",
+  "crime_type": "homicide",
+  "incident_time": "2026-09-25T21:30:00+05:30",
+  "reference_time": "2026-09-26T09:00:00+05:30",
+  "scene": {"setting": "outdoor", "ambient_temp_c": 31, "weather": "dry"},
+  "accused_in_custody": true,
+  "custody_start": "2026-09-26T06:00:00+05:30",
+  "description": "Ex-A1: charred remains recovered under the culvert\nEx-A2: half-burnt cigarette butt, 3 m from the body\nEx-A3: 6 cigarette butts of the same brand near the parked lorry, 40 m from the body\nEx-A4: two empty liquor bottles beside the lorry parking area\nEx-A5: empty petrol bottle (1 litre) found 5 m from the body\nEx-A6: burnt cloth pieces and ash sample from the burn area\nEx-A7: two-wheeler (scooty) of the deceased with deflated rear tyre, parked near toll plaza road\nEx-A8: bloodstained stone approx 2 kg near the body\nEx-A9: mobile phone of the deceased, switched off, found in bushes\nEx-A10: gutka packet and matchbox near the culvert entrance\nEx-A11: tyre impressions of heavy vehicle on soft soil, not yet collected\nEx-A12: footprints near the culvert, not yet collected\nEx-A13: CCTV at toll plaza covering the service road, not yet seized\nEx-A14: 4 mobile phones seized from the accused\nEx-A15: clothes of accused seized at the instance of accused\nEx-A16: soil sample from burn area\nEx-A17: viscera preserved at autopsy, kept at ambient temperature\nEx-A18: lighter recovered from the accused",
+  "photo_captions": [
+    "IMG_0012 Ex-A2 cigarette butt in situ with scale",
+    "IMG_0020 overview of culvert and service road",
+    "IMG_0033 Ex-A8 stone near the body with scale",
+    "IMG_0041 Ex-A5 petrol bottle",
+    "IMG_0057 Ex-A7 scooty at toll plaza road"
+  ]
+}

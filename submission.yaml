@@ -1,0 +1,77 @@
+# =============================================================================
+# HACKATHON SUBMISSION METADATA
+# =============================================================================
+# Before submitting, replace every "REPLACE_ME" value with your real team details
+# (run `python src/scripts/presubmit_check.py` — it lists anything left to fill).
+# =============================================================================
+
+team:
+  name: "Team Pramaan"                              # REQUIRED
+  track: "AI"                                       # REQUIRED — one of: AI | DevOps | Sustainability | Open
+  lead:
+    name: "REPLACE_ME Team Lead Name"               # REQUIRED
+    email: "REPLACE_ME.lead@example.com"            # REQUIRED
+  members:
+    - name: "REPLACE_ME Member 1"                   # REQUIRED
+      email: "REPLACE_ME.member1@example.com"
+    - name: "REPLACE_ME Member 2"
+      email: "REPLACE_ME.member2@example.com"
+
+submission:
+  title: "Pramaan — AI Crime-Scene Evidence Triage & FSL Scheduling (MCP)"   # REQUIRED
+
+  problem_statement: >                              # REQUIRED
+    Indian investigators seize hundreds of exhibits at serious crime scenes, but State Forensic Science
+    Laboratories are overloaded and examine them largely in the order they arrive, so decisive, perishable
+    evidence waits for weeks — in the 2019 Hyderabad case a DNA-bearing cigarette butt among 200+ items and
+    3,000+ photographs was nearly missed. Investigating Officers have no tool that ranks exhibits by probative
+    value and perishability, flags what needs urgent specialised testing, and hands the lab a defensible schedule.
+
+  solution_summary: >                               # REQUIRED
+    Pramaan is an MCP server, REST API and web dashboard built on one deterministic, explainable triage engine
+    driven by a versioned forensic knowledge base. From an officer's free-text seizure list it classifies every
+    exhibit, computes an Evidentiary Priority Index from probative value, degradation urgency and
+    irreplaceability, raises urgent-testing and act-now flags, sequences examinations least-destructive-first,
+    stages high-volume items, and produces a degradation-aware FSL examination schedule measured against
+    first-in-first-out — with a printable submission packet and a SHA-256 hash-chained chain-of-custody ledger.
+
+  key_features:                                     # REQUIRED
+    - "Explainable Evidentiary Priority Index per exhibit (probative x urgency x irreplaceability) with crime-type weights, BNSS s.184 statutory floor, caveats and 'corroborate with' guidance from a hashed YAML knowledge base"
+    - "Degradation-aware urgency: evidential-quality half-lives by storage condition, field windows (CCTV overwrite, rain on impressions), ACT NOW flags and preservation what-if simulation"
+    - "FSL schedule optimiser (Apparent Tardiness Cost portfolio, custody-deadline aware under BNSS s.187(3)) with staged testing — measured against status quo: 93% vs 85% evidential value retained and P1 results in ~7 vs ~29 working days on a 200-exhibit benchmark"
+    - "IBM Bob as the officer's agent: 16-tool MCP server, AGENTS.md protocol and 7-phase evidence-triage-workflow skill, 3 custom modes, legal guard-rail rules, and lifecycle hooks that block personal data, audit every Bob tool call and enforce a completion gate — outputs state.json, audit.jsonl, report.html, graph.html and the PDF packet, live in the web dashboard"
+    - "Tamper-evident SHA-256 hash-chained custody ledger, result hashes, privacy gate in code (Aadhaar/phone/e-mail/protected names rejected) and a PDF FSL submission packet"
+
+    - "Law-enforcement module: evidence authenticity & admissibility readiness under the Bharatiya Sakshya Adhiniyam 2023 (s.61, s.62, s.63(2)(a)-(d), s.63(4) Schedule certificate Part A/B with hash verification) plus BNSS s.105 and chain-of-custody checks — READY / CURABLE GAPS / AT RISK, authenticity report PDF and pre-filled s.63(4) certificate drafts"
+    - "Scales from one lab to the State FSL network: HQ + Regional FSLs + CFSL referral planned as one pool (earliest completion incl. transport, heap timelines, ms-level planning for thousands of exhibits) with capacity what-ifs per division"
+
+  tech_stack:
+    languages: ["Python", "JavaScript", "HTML", "CSS"]                                   # REQUIRED
+    frameworks: ["Model Context Protocol (mcp Python SDK)", "FastAPI", "Pydantic", "Uvicorn", "ReportLab"]
+    ibm_technologies: ["IBM Bob (agent front-end: AGENTS.md protocol, 6 skills, 3 custom modes, rules, slash commands, 5 lifecycle hooks, MCP client)", "IBM watsonx.ai (Granite 4 — optional, closed-vocabulary LLM layer for parsing and narrative)"]
+    databases: ["SQLite (WAL) with SHA-256 hash-chained ledger"]
+    other: ["Docker", "GitHub Actions", "pytest", "Playwright (demo capture)"]
+
+  what_we_are_most_proud_of: >
+    Nothing in the ranking is a black box: every tier can be explained factor by factor, reproduced bit-for-bit
+    from the knowledge-base hash, and verified against the custody ledger — while the scheduler's benefit is
+    measured against explicit baselines on a reproducible Hyderabad-scale benchmark (all five hidden "needle"
+    exhibits, including the DNA-bearing butt near the body, surface as P1).
+
+  known_limitations: >
+    Degradation half-lives, lab capacities and scoring weights are conservative planning heuristics that must be
+    calibrated with a partner FSL; all scenarios are synthetic. Photo analysis is caption-based (no computer
+    vision yet). The optional watsonx.ai layer needs IBM Cloud credentials; the default engine runs fully offline.
+
+# =============================================================================
+# ARTIFACT LOCATIONS
+# These paths are relative to the repo root. Only change if you moved files.
+# =============================================================================
+artifacts:
+  source_code: "src/"
+  setup_guide: "docs/setup-guide.md"
+  architecture_doc: "docs/architecture.md"
+  demo_video: "demo/demo-video-link.txt"   # URL to hosted video (YouTube, Loom, Box)
+  live_demo: "demo/live-demo-url.txt"      # URL to deployed demo (optional)
+  screenshots: "demo/screenshots/"
+  presentation: "presentation/"

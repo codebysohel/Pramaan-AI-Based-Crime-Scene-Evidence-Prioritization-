@@ -1,0 +1,684 @@
+# =============================================================================
+# Pramaan knowledge layer 2 — Evidence types
+# =============================================================================
+# Every exhibit an investigator lists is mapped to exactly ONE type below (plus
+# optional modifiers such as "blood" or "burnt"). The type decides:
+#   category          -> crime-type relevance weight (crime_profiles.yaml)
+#   exam_plan         -> examinations requested from the FSL (laboratory.yaml)
+#   individualizing   -> 0..1, potential to point to ONE source (DNA ~0.9,
+#                        soil ~0.35). Drives probative value.
+#   replaceable       -> 0..1, can it be re-collected later? (reference blood
+#                        from a living suspect: high; scene cigarette butt: 0)
+#   degradation       -> named profile in degradation.yaml (evidential-quality
+#                        half-life by storage condition)
+#   field_window_h    -> hours before the evidence is LOST at the scene if not
+#                        collected (CCTV overwrite, GSR on hands, rain on prints)
+#   weather_sensitive -> field window shrinks sharply in rain
+#   flags             -> static urgent-testing flags (see scoring.py)
+#   caveat            -> what this exhibit does NOT prove (shown to IO & court)
+#   corroborate_with  -> what to check next to make the inference robust
+#   handling          -> packaging / preservation instruction
+#
+# Keywords are matched as whole words/phrases, case-insensitive. Longer and
+# more specific phrases win. `kind: stain` types yield to an object type when
+# both match ("bloodstained stone" = blunt_weapon + blood modifier).
+# =============================================================================
+
+types:
+  # ---------------------------------------------------------------- biological
+  - id: bloodstain
+    as_modifier: blood
+    name: "Bloodstain / blood swab"
+    category: biological
+    kind: stain
+    keywords: [blood stain, blood stains, bloodstain, bloodstains, blood swab, swab of blood, blood spatter, blood pool,
+               blood drops, dried blood, blood smear, suspected blood, blood clot, blood trail,
+               stain suspected to be blood]
+    exam_plan: [presumptive_blood, dna_profiling]
+    individualizing: 0.90
+    replaceable: 0.05
+    degradation: dna_stain
+    caveat: "Establishes presence of human blood and (with DNA) its source — not when or how it was deposited. Pattern interpretation needs scene photographs."
+    corroborate_with: ["Bloodstain pattern photographs", "Victim and suspect reference samples", "Injury pattern in post-mortem report"]
+    handling: "Swab with sterile cotton moistened in distilled water, air-dry in shade, pack in paper envelope. Never seal wet swabs in plastic."
+
+  - id: reference_blood
+    name: "Reference sample (blood / buccal / FTA card)"
+    category: reference
+    keywords: [reference blood, reference sample, control sample, fta card, buccal swab,
+               blood sample of accused, blood sample of the accused, blood sample of victim,
+               blood sample of the victim, blood sample of deceased, blood sample of the deceased,
+               sample for dna comparison, blood collected on fta]
+    exam_plan: [dna_profiling]
+    individualizing: 0.60
+    replaceable: 0.70
+    degradation: dna_stain
+    caveat: "A reference sample proves nothing alone; it enables comparison. Without it, scene DNA profiles can only be searched against a database."
+    corroborate_with: ["All DNA-bearing scene exhibits"]
+    handling: "Blood on FTA card or EDTA vial (refrigerate). Buccal swabs air-dried. Record consent / court order."
+
+  - id: semen_stain
+    as_modifier: semen
+    name: "Suspected semen stain"
+    category: biological
+    kind: stain
+    keywords: [semen, seminal stain, suspected semen, seminal fluid, semen stain]
+    exam_plan: [body_fluid_id, dna_profiling]
+    individualizing: 0.95
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "Semen identification with a DNA match shows sexual contact by the source; it does not by itself establish absence of consent."
+    corroborate_with: ["Medical examination findings", "Victim statement", "Clothing and bedding examination"]
+    handling: "Air-dry, paper packaging, refrigerate if not dry. Circle stain area with pencil on outer packaging note, never on the item."
+
+  - id: sexual_assault_kit
+    name: "Sexual assault evidence kit (medico-legal samples)"
+    category: biological
+    keywords: [sexual assault kit, sexual assault evidence kit, safe kit, rape kit, medico-legal samples,
+               mlc samples, vaginal swab, vaginal swabs, swabs collected at hospital,
+               medical examination samples, swabs from the survivor]
+    exam_plan: [body_fluid_id, dna_profiling]
+    individualizing: 0.95
+    replaceable: 0.00
+    degradation: sexual_assault_kit
+    field_window_h: 96
+    mandatory: BNSS_184
+    flags: [MANDATED_EXAMINATION, COLD_CHAIN_REQUIRED]
+    caveat: "Absence of foreign DNA does not rule out assault (time since incident, washing, condom use). Interpret with the medical report."
+    corroborate_with: ["Survivor's clothing and bedding", "Reference samples of survivor and accused", "Toxicology if drug-facilitated assault is suspected"]
+    handling: "Keep refrigerated (2–8 °C), sealed kit with doctor's seal; forward without delay. Maintain survivor anonymity in all labels."
+
+  - id: saliva_swab
+    as_modifier: saliva
+    name: "Saliva / bite-mark swab"
+    category: biological
+    kind: stain
+    keywords: [saliva, bite mark swab, bite-mark swab, saliva swab, spittle, sputum]
+    exam_plan: [body_fluid_id, dna_profiling]
+    individualizing: 0.85
+    replaceable: 0.00
+    degradation: saliva_item
+    caveat: "Saliva DNA links a person to contact with the surface, not the time of contact."
+    corroborate_with: ["Bite-mark photographs with scale", "Reference samples"]
+    handling: "Double-swab technique (wet then dry), air-dry, paper envelope."
+
+  - id: cigarette_butt
+    name: "Cigarette / beedi butt"
+    category: biological
+    keywords: [cigarette butt, cigarette butts, cigarette end, cigarette stub, cigarette, cigarettes,
+               beedi, bidi, beedis, bidis, filter tip, butt, butts, stub, stubs]
+    exam_plan: [dna_profiling]
+    individualizing: 0.90
+    replaceable: 0.00
+    degradation: saliva_item
+    weather_sensitive: true
+    field_window_h: 72
+    caveat: "Proves a smoker's saliva DNA was deposited — not when. Judge freshness (moisture, ash, brand) and background litter before inferring presence at the time of offence."
+    corroborate_with: ["Brand found with suspects", "CCTV at nearby shops (purchase)", "Other butts of the same brand nearby"]
+    handling: "Pick with forceps by the burnt end, air-dry, pack EACH butt separately in paper. Photograph in situ with scale first."
+
+  - id: drinking_vessel
+    name: "Bottle / glass / cup (saliva + prints)"
+    category: biological
+    keywords: [liquor bottle, beer bottle, whisky bottle, alcohol bottle, glass tumbler, tumbler,
+               drinking glass, plastic glass, disposable glass, tea cup, cup, water bottle,
+               soft drink bottle, tetra pack, beer can, bottle, bottles, bottle cap, straw]
+    exam_plan: [touch_dna_sampling, latent_print_development, dna_profiling, latent_print_comparison]
+    individualizing: 0.85
+    replaceable: 0.00
+    degradation: saliva_item
+    weather_sensitive: true
+    field_window_h: 72
+    caveat: "Rim DNA and prints show handling/drinking by a person, not when. Shared bottles often give mixed profiles."
+    corroborate_with: ["Remaining liquid (toxicology if drugging suspected)", "Shop CCTV / bill"]
+    handling: "Hold at base with gloved fingers; swab rim before any fingerprint powder; pack upright in a box, not a bag."
+
+  - id: litter_wrapper
+    name: "Litter handled by offender (gutka / food wrapper, matchbox, lighter)"
+    category: biological
+    keywords: [gutka packet, gutka packets, gutka sachet, pan masala packet, pan masala sachet,
+               tobacco pouch, khaini, food wrapper, chips packet, biscuit packet, wrapper, wrappers,
+               matchbox, lighter, polythene bag, carry bag, packet]
+    exam_plan: [touch_dna_sampling, latent_print_development, dna_profiling, latent_print_comparison]
+    individualizing: 0.60
+    replaceable: 0.00
+    degradation: touch_dna
+    weather_sensitive: true
+    field_window_h: 48
+    caveat: "Touch DNA on handled litter is often low-template and may be mixed; background litter is common at roadsides."
+    corroborate_with: ["Brand/batch found with suspects", "Proximity to body or point of entry"]
+    handling: "Paper envelope, do not fold across print areas, avoid plastic if damp."
+
+  - id: hair
+    name: "Hair"
+    category: biological
+    keywords: [hair, hairs, strand of hair, strands of hair, hair with root, tuft of hair, hair strands]
+    exam_plan: [hair_microscopy, dna_profiling]
+    individualizing: 0.70
+    replaceable: 0.00
+    degradation: hair
+    caveat: "Only hairs with root/sheath material give nuclear DNA reliably; shed hairs may need mitochondrial DNA (not available in every FSL). Microscopy alone is class evidence."
+    corroborate_with: ["Reference hair and blood samples", "Location on victim's hands/clothing"]
+    handling: "Fold in paper (druggist fold), separate packet per location."
+
+  - id: fingernail_scrapings
+    name: "Fingernail scrapings / clippings"
+    category: biological
+    keywords: [nail scrapings, fingernail scrapings, nail clippings, fingernail clippings,
+               scrapings from nails, nail cuttings]
+    exam_plan: [dna_profiling]
+    individualizing: 0.90
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "Foreign DNA under the victim's nails suggests close contact (e.g. a struggle) but can also arise from innocent contact."
+    corroborate_with: ["Scratch injuries on suspect (medical examination)", "Reference samples"]
+    handling: "Separate envelope per hand, label left/right; refrigerate."
+
+  - id: charred_remains
+    name: "Charred remains / bone / teeth"
+    category: biological
+    keywords: [charred remains, burnt remains, charred bone, charred bones, bone fragments, bones,
+               teeth, tooth, skeletal remains, burnt body parts]
+    exam_plan: [dna_bone_tooth]
+    individualizing: 0.95
+    replaceable: 0.05
+    degradation: bone
+    caveat: "Establishes identity of the deceased; heat damage may yield partial profiles. Long turnaround — start early."
+    corroborate_with: ["Reference samples from biological parents/children", "Dental records", "Personal effects"]
+    handling: "Collect with forensic odontologist/anthropologist where possible; dry, rigid container, no plastic."
+
+  - id: condom
+    name: "Used condom"
+    category: biological
+    keywords: [condom, used condom, condom wrapper]
+    exam_plan: [body_fluid_id, dna_profiling]
+    individualizing: 0.95
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "Inner and outer surfaces may carry different contributors; request separate sampling."
+    corroborate_with: ["Medical examination", "Wrapper (latent prints)"]
+    handling: "Freeze or refrigerate immediately in a sealed container; forward urgently."
+
+  # ------------------------------------------------------------------ clothing
+  - id: clothing
+    name: "Clothing / bedding / textiles"
+    category: clothing
+    keywords: [torn glove, cotton glove, glove, gloves, shirt, t-shirt, tshirt, jeans, trousers, pants, saree, sari, salwar, kameez, kurta,
+               kurti, dupatta, jacket, sweater, lungi, dhoti, undergarment, undergarments, innerwear,
+               vest, clothes, clothing, garment, garments, bedsheet, bed sheet, pillow cover,
+               pillow, towel, blanket, handkerchief, cap, scarf]
+    exam_plan: [trace_recovery, presumptive_blood, body_fluid_id, dna_profiling, fibre_comparison]
+    individualizing: 0.75
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "Stains on clothing show transfer, not the mechanism. Wearer's own DNA will be present; interpret foreign profiles only."
+    corroborate_with: ["Bloodstain pattern on garment", "Damage (cuts/tears) vs weapon", "Wearer reference sample"]
+    handling: "Air-dry in shade on clean paper, fold with paper between layers, EACH garment in a separate paper bag."
+
+  - id: footwear_item
+    name: "Footwear (the shoe / chappal itself)"
+    category: clothing
+    keywords: [shoe, shoes, chappal, chappals, slipper, slippers, sandal, sandals, boot, boots,
+               sneakers, footwear]
+    exam_plan: [trace_recovery, presumptive_blood, footwear_comparison, dna_profiling]
+    individualizing: 0.60
+    replaceable: 0.10
+    degradation: touch_dna
+    caveat: "Sole pattern is class evidence unless wear/damage marks are matched."
+    corroborate_with: ["Footwear impressions at scene", "Soil / blood on sole"]
+    handling: "Separate paper bag per shoe; do not clean soil from the sole."
+
+  # --------------------------------------------------------------------- trace
+  - id: glass_fragments
+    name: "Glass fragments"
+    category: trace
+    keywords: [glass pieces, broken glass, glass fragments, glass shards, headlight glass,
+               headlamp glass, window glass, windscreen glass, glass piece, tail-light pieces,
+               tail light pieces, broken tail-light, indicator lens, headlight pieces, lamp fragments]
+    exam_plan: [glass_paint_comparison]
+    individualizing: 0.45
+    replaceable: 0.10
+    degradation: stable
+    caveat: "Glass comparison is class evidence: it shows consistency with a source, not uniqueness, unless a physical fit is found."
+    corroborate_with: ["Suspect vehicle headlamp / window", "Physical fit of larger pieces"]
+    handling: "Rigid box, separate by location; keep large pieces for physical fit."
+
+  - id: paint_transfer
+    name: "Paint chips / transfer"
+    category: trace
+    keywords: [paint smear on, paint smear, paint smears, paint scrape, paint chips, paint chip, paint flakes, paint flake, paint transfer, scraped paint,
+               paint smear, paint scrapings]
+    exam_plan: [glass_paint_comparison]
+    individualizing: 0.50
+    replaceable: 0.10
+    degradation: stable
+    caveat: "Multi-layer paint can narrow a vehicle make/model; a physical fit is needed to individualize."
+    corroborate_with: ["Damage on suspect vehicle", "Tyre impressions", "CCTV"]
+    handling: "Folded paper, then envelope; never tape paint chips."
+
+  - id: soil
+    name: "Soil / mud sample"
+    category: trace
+    keywords: [soil sample, soil samples, soil, mud, mud sample, earth sample]
+    exam_plan: [soil_comparison]
+    individualizing: 0.35
+    replaceable: 0.60
+    degradation: stable
+    caveat: "Soil comparison is class evidence and needs control samples from multiple nearby spots."
+    corroborate_with: ["Soil on suspect footwear / vehicle", "Control samples from 3–5 points"]
+    handling: "Collect control samples from several points; dry, plastic container acceptable for dry soil."
+
+  - id: fibres
+    name: "Fibres / threads / torn fabric"
+    category: trace
+    keywords: [fibres, fibers, fibre, fiber, threads, thread, fabric piece, torn cloth,
+               piece of cloth, torn fabric]
+    exam_plan: [fibre_comparison]
+    individualizing: 0.40
+    replaceable: 0.05
+    degradation: stable
+    caveat: "Fibre evidence is class evidence; significance depends on how common the fibre type is."
+    corroborate_with: ["Garments of suspect and victim", "Vehicle upholstery"]
+    handling: "Lift with tape or forceps into folded paper; avoid cross-contamination between victim/suspect items."
+
+  # ---------------------------------------------------------------- impression
+  - id: latent_print_surface
+    name: "Latent / chance fingerprints on a surface"
+    category: impression
+    keywords: [jewellery boxes, jewellery box, cash box, empty boxes, fingerprint, fingerprints, finger print, finger prints, palm print, palm prints,
+               chance print, chance prints, latent print, latent prints, finger impressions,
+               prints on]
+    exam_plan: [latent_print_development, latent_print_comparison]
+    individualizing: 0.90
+    replaceable: 0.00
+    degradation: latent_print
+    weather_sensitive: true
+    field_window_h: 72
+    caveat: "A print shows the person touched the surface at some time; prints cannot be dated reliably."
+    corroborate_with: ["Elimination prints of residents/first responders", "Position of print vs point of entry"]
+    handling: "Develop and lift at scene by fingerprint expert or seize the object; photograph before and after development."
+
+  - id: footwear_impression
+    name: "Footwear impression"
+    category: impression
+    keywords: [footprint, footprints, foot print, foot prints, shoe print, shoe prints, shoe impression,
+               footwear impression, footwear impressions, foot marks, footmarks, foot impressions]
+    exam_plan: [footwear_comparison]
+    individualizing: 0.55
+    replaceable: 0.00
+    degradation: stable
+    weather_sensitive: true
+    field_window_h: 48
+    caveat: "Sole pattern narrows the footwear model; individualization needs accidental characteristics (cuts, wear)."
+    corroborate_with: ["Suspect footwear", "Direction of travel", "Number of distinct patterns (number of persons)"]
+    handling: "Photograph with scale at 90°, then cast (dental stone). Protect from rain immediately."
+
+  - id: tyre_impression
+    name: "Tyre impression / tread mark"
+    category: impression
+    keywords: [tyre mark, tyre marks, tire mark, tire marks, tyre impression, tyre impressions,
+               tire impression, skid mark, skid marks, tread mark, tread marks, tyre track, tyre tracks]
+    exam_plan: [tyre_comparison]
+    individualizing: 0.45
+    replaceable: 0.00
+    degradation: stable
+    weather_sensitive: true
+    field_window_h: 48
+    caveat: "Tread design is class evidence; measure track width and wheelbase to narrow vehicle type."
+    corroborate_with: ["Suspect vehicle tyres", "CCTV of vehicles passing", "Paint / glass transfer"]
+    handling: "Photograph full circumference length with scale; cast; record track width."
+
+  - id: tool_marks
+    name: "Tool marks (forced lock, pry marks)"
+    category: impression
+    keywords: [tool mark, tool marks, toolmark, toolmarks, pry mark, pry marks, jimmy mark,
+               broken lock, cut lock, forced lock, cut padlock, broken padlock, padlock,
+               lock, latch, door bolt, cut grill]
+    exam_plan: [toolmark_examination]
+    individualizing: 0.50
+    replaceable: 0.10
+    degradation: stable
+    caveat: "Tool marks can associate a tool class; individualization requires the suspect tool."
+    corroborate_with: ["Tools recovered from suspects", "Latent prints near point of entry"]
+    handling: "Seize the lock/strike plate; if impossible, cast with silicone; never fit the suspect tool into the mark."
+
+  # -------------------------------------------------------------------- weapon
+  - id: sharp_weapon
+    name: "Sharp-edged weapon"
+    category: weapon
+    keywords: [knife, knives, dagger, sickle, blade, machete, axe, chopper, razor, sword, kukri,
+               cleaver, scissors, broken bottle neck]
+    exam_plan: [trace_recovery, touch_dna_sampling, presumptive_blood, latent_print_development,
+                dna_profiling, latent_print_comparison, toolmark_examination]
+    individualizing: 0.85
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "Blood on a weapon shows contact with the source; handler DNA/prints show handling — neither alone proves who struck."
+    corroborate_with: ["Wound dimensions in post-mortem report", "Cut marks on clothing", "Disclosure/recovery memo"]
+    handling: "Secure in a rigid box with cable ties, blade guarded; never wrap in cloth or plastic."
+
+  - id: blunt_weapon
+    name: "Blunt object used as weapon"
+    category: weapon
+    keywords: [stone, stones, rock, brick, iron rod, rod, lathi, stick, hammer, pipe, iron pipe,
+               bat, cricket bat, club, wooden log, log, spanner]
+    exam_plan: [trace_recovery, presumptive_blood, touch_dna_sampling, dna_profiling]
+    individualizing: 0.70
+    replaceable: 0.00
+    degradation: dna_stain
+    caveat: "A bloodstained object near a body is consistent with use as a weapon; confirm with injury pattern."
+    corroborate_with: ["Post-mortem injury pattern", "Hair/tissue adhering to object"]
+    handling: "Rigid box; protect stained surfaces; air-dry if wet."
+
+  - id: ligature
+    name: "Ligature (rope, cord, wire)"
+    category: weapon
+    keywords: [ligature, rope, cord, nylon rope, wire, cable, noose, belt, string, chunni used]
+    exam_plan: [trace_recovery, touch_dna_sampling, dna_profiling, fibre_comparison]
+    individualizing: 0.75
+    replaceable: 0.00
+    degradation: touch_dna
+    caveat: "Do not untie the knot — knot type and handling DNA are both evidence."
+    corroborate_with: ["Ligature mark in post-mortem report", "Fibres on victim's neck"]
+    handling: "Cut away from the knot, tie cut ends with thread and label; paper packaging."
+
+  # ------------------------------------------------------------------- firearm
+  - id: firearm
+    name: "Firearm (incl. country-made)"
+    category: firearm
+    keywords: [pistol, revolver, gun, firearm, country-made pistol, country made pistol, katta,
+               tamancha, desi katta, rifle, shotgun, carbine, airgun]
+    exam_plan: [touch_dna_sampling, latent_print_development, firearm_examination, dna_profiling,
+                latent_print_comparison]
+    individualizing: 0.90
+    replaceable: 0.00
+    degradation: touch_dna
+    flags: [SAFETY_UNLOAD_FIRST]
+    caveat: "Test-fire comparison links the weapon to fired ammunition, not to the shooter; handler DNA/prints are separate questions."
+    corroborate_with: ["Cartridge cases and projectiles", "GSR on suspect's hands/clothing"]
+    handling: "Make safe (unload, record chamber state) by an authorised person; box with ties; never insert objects in the barrel."
+
+  - id: cartridge_case
+    name: "Fired cartridge case"
+    category: firearm
+    keywords: [cartridge case, cartridge cases, empty cartridge, empty cartridges, shell casing,
+               shell casings, spent case, spent cartridge, fired cartridge, casing, casings, cartridge]
+    exam_plan: [touch_dna_sampling, cartridge_comparison]
+    individualizing: 0.80
+    replaceable: 0.00
+    degradation: touch_dna
+    caveat: "Links to a specific firearm through breech-face/firing-pin marks; the loader's touch DNA may be present."
+    corroborate_with: ["Suspect firearm (test fire)", "Position pattern (shooter location)"]
+    handling: "Pick by the rim with gloves, separate container, record position."
+
+  - id: projectile
+    name: "Bullet / pellet / projectile"
+    category: firearm
+    keywords: [bullet, bullets, pellet, pellets, projectile, projectiles, slug, lead ball]
+    exam_plan: [cartridge_comparison]
+    individualizing: 0.80
+    replaceable: 0.00
+    degradation: stable
+    caveat: "Deformed projectiles may only give class characteristics."
+    corroborate_with: ["Suspect firearm", "Trajectory analysis", "Post-mortem retrieval"]
+    handling: "Never mark the bearing surface; wrap in soft paper in a rigid container."
+
+  - id: gsr_kit
+    name: "Gunshot residue (GSR) kit / hand swabs"
+    category: firearm
+    keywords: [gsr, gunshot residue, gsr kit, hand swabs for gsr, hand wash, gsr stubs,
+               firearm discharge residue]
+    exam_plan: [gsr_analysis]
+    individualizing: 0.60
+    replaceable: 0.00
+    degradation: stable
+    field_window_h: 6
+    flags: [TIME_CRITICAL_COLLECTION]
+    caveat: "GSR shows association with a discharge event (firing, being near, or handling a fired weapon) — not who fired."
+    corroborate_with: ["Clothing of suspect", "Time of arrest vs incident"]
+    handling: "Collect within 4–6 h of discharge, before hand-washing; separate kits per person; never in the firing range area."
+
+  # ---------------------------------------------------------------- toxicology
+  - id: viscera
+    name: "Post-mortem viscera / stomach contents"
+    category: toxicology
+    keywords: [viscera, stomach contents, stomach wash, gastric lavage, liver, kidney,
+               postmortem samples, post-mortem samples, visceral samples, stomach and intestines]
+    exam_plan: [volatile_analysis, toxicology_screen]
+    individualizing: 0.70
+    replaceable: 0.00
+    degradation: viscera
+    flags: [VOLATILE_TOXICANTS, COLD_CHAIN_REQUIRED]
+    caveat: "A negative screen does not exclude poisoning (unscreened compounds, decomposition, delay)."
+    corroborate_with: ["Post-mortem findings", "Suspected poison container", "Treating hospital records"]
+    handling: "Preserve in saturated salt solution (not for alcohol/volatile cases) in sealed glass jars; refrigerate; forward urgently."
+
+  - id: body_fluid_tox
+    name: "Blood / urine for alcohol & drugs (living person)"
+    category: toxicology
+    keywords: [blood for alcohol, blood alcohol, urine sample, urine, blood sample for toxicology,
+               blood for toxicology, drug test sample, urine for drugs]
+    exam_plan: [volatile_analysis, toxicology_screen]
+    individualizing: 0.65
+    replaceable: 0.00
+    degradation: volatile_tox
+    field_window_h: 24
+    flags: [VOLATILE_TOXICANTS, COLD_CHAIN_REQUIRED]
+    caveat: "Concentrations fall quickly after the event; back-calculation needs time of collection."
+    corroborate_with: ["Time of collection vs incident", "Witness / CCTV of consumption"]
+    handling: "Sodium fluoride vial for alcohol, refrigerate, record exact collection time."
+
+  - id: poison_container
+    name: "Suspected poison / pesticide / drug container"
+    category: chemical
+    keywords: [pesticide bottle, pesticide, poison, insecticide, rat poison, phorate, celphos,
+               aluminium phosphide, sulphas, suspected poison, tablets, tablet strip, syringe,
+               vial, injection vial, powder packet]
+    exam_plan: [latent_print_development, toxicology_screen, latent_print_comparison]
+    individualizing: 0.60
+    replaceable: 0.00
+    degradation: latent_print
+    flags: [VOLATILE_TOXICANTS]
+    caveat: "Presence of a poison container shows availability, not administration."
+    corroborate_with: ["Viscera toxicology", "Purchase records / shop CCTV", "Latent prints on container"]
+    handling: "Keep upright, seal cap with tape, separate box; phosphide residues release phosphine gas — ventilate."
+
+  - id: accelerant_container
+    name: "Accelerant container (petrol / kerosene)"
+    category: chemical
+    keywords: [petrol bottle, petrol can, kerosene can, kerosene bottle, diesel can, jerrycan,
+               jerry can, fuel container, fuel can, petrol, kerosene, diesel, empty petrol bottle]
+    exam_plan: [latent_print_development, fire_debris_analysis, latent_print_comparison]
+    individualizing: 0.65
+    replaceable: 0.00
+    degradation: fire_debris
+    flags: [VOLATILE_TOXICANTS]
+    caveat: "Accelerant identity (e.g., petrol) supports deliberate ignition; linking the container to a person needs prints/DNA or purchase evidence."
+    corroborate_with: ["Fire debris analysis", "Fuel station CCTV / receipts", "Latent prints"]
+    handling: "Airtight metal can or nylon fire-debris bag — never polythene; keep cool."
+
+  - id: fire_debris
+    name: "Fire debris / burnt material"
+    category: chemical
+    keywords: [fire debris, burnt debris, ash sample, ash samples, ashes, burnt cloth, charred material,
+               charred wood, burnt material, burnt paper, char]
+    exam_plan: [fire_debris_analysis]
+    individualizing: 0.55
+    replaceable: 0.00
+    degradation: fire_debris
+    weather_sensitive: true
+    field_window_h: 24
+    flags: [VOLATILE_TOXICANTS]
+    caveat: "Accelerant residues evaporate within hours to days; a negative result after delay is weak evidence of absence."
+    corroborate_with: ["Burn pattern photographs", "Accelerant container", "Comparison sample from unburnt area"]
+    handling: "Airtight container filled to 2/3, collected from low points of burn pattern; include an unburnt control."
+
+  - id: narcotics
+    name: "Suspected narcotic / psychotropic substance"
+    category: chemical
+    keywords: [ganja, charas, heroin, smack, brown sugar, mdma, cocaine, contraband, narcotic,
+               narcotics, white powder, opium, poppy straw, hashish]
+    exam_plan: [drug_identification]
+    individualizing: 0.40
+    replaceable: 0.20
+    degradation: stable
+    caveat: "Identification and purity are needed for quantity-based charges; sampling must follow NDPS procedure."
+    corroborate_with: ["Seizure memo & sampling record", "Digital evidence of transactions"]
+    handling: "Draw representative samples in duplicate as per NDPS procedure; seal with seizing officer's seal."
+
+  # ------------------------------------------------------------------- digital
+  - id: mobile_phone
+    name: "Mobile phone / SIM"
+    category: digital
+    keywords: [mobile phone, mobile phones, smartphone, cell phone, cellphone, mobile handset,
+               handset, phone, phones, mobile, sim card, sim cards, feature phone]
+    exam_plan: [mobile_extraction]
+    individualizing: 0.85
+    replaceable: 0.20
+    degradation: stable
+    field_window_h: 24
+    flags: [DIGITAL_VOLATILE]
+    caveat: "Device data shows what the device did; attributing actions to a person needs corroboration. Certificate under BSA 2023 §63 needed for admissibility."
+    corroborate_with: ["CDR / tower location from service provider", "CCTV", "Cloud account records"]
+    handling: "Airplane mode if unlocked, otherwise Faraday bag; keep charged; do NOT browse the device; record IMEI."
+
+  - id: cctv_dvr
+    name: "CCTV footage / DVR / NVR"
+    category: digital
+    keywords: [cctv of, cctv at, cctv covering, cctv footage of, cctv camera, cctv recording, cctv, cctv footage, dvr, nvr, camera footage, surveillance footage, toll plaza footage,
+               video recorder, cctv camera, dashcam, dash cam, cctv dvr]
+    exam_plan: [cctv_extraction]
+    individualizing: 0.80
+    replaceable: 0.00
+    degradation: stable
+    field_window_h: 168
+    flags: [DIGITAL_OVERWRITE]
+    caveat: "Footage timestamps may be offset from real time — record the DVR clock offset at seizure."
+    corroborate_with: ["Other cameras on the route", "Vehicle registration databases", "Mobile tower data"]
+    handling: "Seize DVR or export native format with hash value on the spot; note clock offset; certificate under BSA 2023 §63."
+
+  - id: computer_storage
+    name: "Computer / storage media"
+    category: digital
+    keywords: [laptop, laptops, computer, desktop computer, hard disk, hard disks, hard drive,
+               pen drive, pendrive, usb drive, memory card, sd card, cpu, tablet, external drive]
+    exam_plan: [storage_imaging]
+    individualizing: 0.70
+    replaceable: 0.10
+    degradation: stable
+    field_window_h: 72
+    flags: [DIGITAL_VOLATILE]
+    caveat: "Files show the account/device activity; user attribution needs corroboration."
+    corroborate_with: ["Login records", "Mobile evidence", "Witness statements"]
+    handling: "If powered on, consult cyber expert before shutdown (RAM/encryption); anti-static bags; write-blocked imaging with hash."
+
+  # ----------------------------------------------------------------- documents
+  - id: questioned_document
+    name: "Questioned document"
+    category: document
+    keywords: [suicide note, letter, handwritten note, threat letter, ransom note, cheque,
+               check leaf, handwritten, document, documents, diary, register, will deed, agreement]
+    exam_plan: [document_examination]
+    individualizing: 0.70
+    replaceable: 0.00
+    degradation: stable
+    caveat: "Handwriting comparison needs adequate admitted/specimen writings. Indented-writing (ESDA) must precede any chemical fingerprint treatment."
+    corroborate_with: ["Admitted writings of suspect", "Specimen writings taken per law"]
+    handling: "Plastic sleeve, do not fold or write on top of it; handle with gloves."
+
+  # ------------------------------------------------------------------- vehicle
+  - id: vehicle
+    name: "Vehicle (two-wheeler, car, truck)"
+    category: vehicle
+    keywords: [two-wheeler, two wheeler, scooter, scooty, motorcycle, motorbike, bike, car, truck,
+               lorry, auto-rickshaw, autorickshaw, auto rickshaw, van, vehicle, jeep, tractor, bus]
+    exam_plan: [trace_recovery, latent_print_development, presumptive_blood, dna_profiling,
+                latent_print_comparison, glass_paint_comparison]
+    individualizing: 0.60
+    replaceable: 0.10
+    degradation: touch_dna
+    caveat: "Examine in situ or tow on a flatbed; handling by many people reduces value of prints on exterior."
+    corroborate_with: ["Registration & ownership", "Tyre impressions", "CCTV / toll records"]
+    handling: "Cover and tow on flatbed; seal doors; examine steering, gear lever, seat belt, door handles first."
+
+  # --------------------------------------------------------------------- other
+  - id: other_object
+    name: "Other object (unclassified)"
+    category: other
+    keywords: []
+    exam_plan: [trace_recovery, latent_print_development, latent_print_comparison]
+    individualizing: 0.30
+    replaceable: 0.20
+    degradation: touch_dna
+    caveat: "Unclassified exhibit — confirm what question this item answers before requesting examinations."
+    corroborate_with: ["Investigator's case theory"]
+    handling: "Package according to material; consult FSL scene expert."
+
+# -----------------------------------------------------------------------------
+# Staged testing. When a scene yields many exhibits of the same low-cost, high-
+# volume kind (cigarette butts, bottles, wrappers, hairs...), FSL practice is to
+# examine the few most promising first and hold the rest pending results. The
+# engine keeps the `first_round` highest-EPI exhibits of each staged type in the
+# submission and marks the others "held for stage 2" (tier P4) with the reason.
+# The officer can override any hold (logged in the chain-of-custody ledger).
+# -----------------------------------------------------------------------------
+staging:
+  first_round: 3
+  types: [cigarette_butt, drinking_vessel, litter_wrapper, hair, fibres, glass_fragments, soil, paint_transfer, fire_debris]
+  # Preservation flags (PERISHABLE) still apply to held exhibits: preserve now, examine later.
+
+# -----------------------------------------------------------------------------
+# Modifiers: extra facts about an item that add examinations or change how it
+# degrades. Detected from the description text independently of the type.
+# -----------------------------------------------------------------------------
+modifiers:
+  blood:
+    patterns: [bloodstained, blood-stained, blood stained, stained with blood, with blood,
+               blood on, smeared with blood, blood-soaked, blood soaked, bloody]
+    add_exams: [presumptive_blood, dna_profiling]
+    individualizing_boost: 0.10
+    degradation: dna_stain
+  semen:
+    patterns: [semen, seminal, suspected semen]
+    add_exams: [body_fluid_id, dna_profiling]
+    individualizing_boost: 0.10
+    degradation: dna_stain
+  saliva:
+    patterns: [saliva, spit, half-eaten, half eaten, chewed]
+    add_exams: [body_fluid_id, dna_profiling]
+    individualizing_boost: 0.05
+    degradation: saliva_item
+  burnt:
+    patterns: [burnt, burned, half-burnt, half burnt, charred, singed, scorched]
+    add_exams: [fire_debris_analysis]
+    individualizing_boost: -0.10
+    note: "Heat exposure degrades DNA; prefer protected areas (seams, folds) for sampling."
+  visible_print:
+    patterns: [visible print, visible prints, prints visible, fingerprints on, finger marks, smudged prints]
+    add_exams: [latent_print_development, latent_print_comparison]
+    individualizing_boost: 0.05
+
+# -----------------------------------------------------------------------------
+# Context signals: phrases that raise probative value because of WHERE or WITH
+# WHOM the item was found. Boosts are additive and capped (see scoring.py).
+# -----------------------------------------------------------------------------
+context_signals:
+  near_body:
+    boost: 0.15
+    patterns: [near the body, beside the body, next to the body, under the body, near body,
+               close to the body, around the body, on the body, from the body, near the deceased,
+               beside the deceased, near the victim, next to the victim, under the victim]
+  point_of_entry:
+    boost: 0.10
+    patterns: [point of entry, entry point, place of entry, broken window, window grill, back door,
+               forced entry, rear door, compound wall, exit point]
+  suspect_link:
+    boost: 0.15
+    patterns: [accused, suspect, suspects, recovered from, at the instance of, disclosure,
+               seized from the house of, seized from]
+  victim_link:
+    boost: 0.05
+    patterns: [victim, deceased, survivor, complainant]
+  weapon_context:
+    boost: 0.10
+    patterns: [weapon of offence, used in the offence, murder weapon, used to attack, used for assault]

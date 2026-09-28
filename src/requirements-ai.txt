@@ -1,0 +1,13 @@
+-r requirements.txt
+
+# PRAMAAN-X local AI modules M1-M5
+# PyTorch must be installed for the target Python/platform.
+torch
+transformers>=4.49
+sentence-transformers>=3.0
+scikit-learn>=1.5
+ultralytics>=8.3
+Pillow>=10.0
+opencv-python>=4.10
+sentencepiece>=0.2
+torchvision

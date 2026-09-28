@@ -1,0 +1,7 @@
+.git
+**/__pycache__
+**/.venv
+src/runtime
+src/.env
+demo
+presentation

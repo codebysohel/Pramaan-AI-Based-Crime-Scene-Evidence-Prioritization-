@@ -1,0 +1,61 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .bob/hooks/run_hook.sh session_start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .bob/hooks/run_hook.sh prompt_guard",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|write_file|apply_diff|insert_content|search_and_replace|edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .bob/hooks/run_hook.sh write_guard",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "use_mcp_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .bob/hooks/run_hook.sh mcp_audit",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .bob/hooks/run_hook.sh completion_gate",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

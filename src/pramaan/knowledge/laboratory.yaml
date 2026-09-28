@@ -1,0 +1,242 @@
+# =============================================================================
+# Pramaan knowledge layer 1 — Forensic Science Laboratory (FSL) model
+# =============================================================================
+# Divisions mirror the typical structure of Indian State FSLs. Examiner counts
+# and bench-hours are ILLUSTRATIVE DEFAULTS for scheduling; every deployment is
+# expected to override them with its own lab profile (see docs/knowledge-base.md).
+#
+# Examination `stage` encodes the forensic principle "least destructive first":
+#   0 = documentation / intake (never blocks anything)
+#   1 = non-destructive recovery (visual search, taping for trace)
+#   2 = sampling for biology (swabbing, cutting) — must precede enhancement chemistry
+#   3 = chemical / physical enhancement (powders, cyanoacrylate, reagents)
+#   4 = destructive analysis (DNA extraction, toxicology, instrumental chemistry)
+#   5 = comparison / reporting (AFIS search, reference comparison)
+# Within one exhibit, an exam may only start after every exam of a lower stage
+# on the same exhibit has finished. Explicit `after:` edges add extra ordering.
+# =============================================================================
+
+lab_profile:
+  name: "Generic State FSL (illustrative defaults)"
+  bench_hours_per_day: 8
+  intake_hours: 2          # registration, photography, seal verification
+
+divisions:
+  SEROLOGY:
+    name: "Biology & Serology"
+    examiners: 2
+  DNA:
+    name: "DNA Profiling"
+    examiners: 3
+  TOXICOLOGY:
+    name: "Toxicology"
+    examiners: 2
+  CHEMISTRY:
+    name: "Chemistry (fire debris, narcotics, poisons)"
+    examiners: 2
+  PHYSICS:
+    name: "Physics (trace, impressions, tool marks)"
+    examiners: 2
+  BALLISTICS:
+    name: "Ballistics"
+    examiners: 1
+  FINGERPRINT:
+    name: "Fingerprint Bureau (latent prints)"
+    examiners: 2
+  CYBER:
+    name: "Cyber & Digital Forensics"
+    examiners: 2
+  DOCUMENTS:
+    name: "Questioned Documents"
+    examiners: 1
+
+examinations:
+  trace_recovery:
+    name: "Trace recovery (visual search, taping for hair/fibre)"
+    division: PHYSICS
+    hours: 2
+    stage: 1
+    destructive: false
+  presumptive_blood:
+    name: "Presumptive blood test & species origin"
+    division: SEROLOGY
+    hours: 2
+    stage: 2
+    destructive: false
+  body_fluid_id:
+    name: "Body-fluid identification (semen / saliva)"
+    division: SEROLOGY
+    hours: 3
+    stage: 2
+    destructive: false
+  touch_dna_sampling:
+    name: "Touch-DNA swabbing of handling zones"
+    division: DNA
+    hours: 1
+    stage: 2
+    destructive: false
+  dna_profiling:
+    name: "DNA extraction, quantitation & STR profiling"
+    division: DNA
+    hours: 16
+    stage: 4
+    destructive: true
+  dna_bone_tooth:
+    name: "DNA from bone / tooth (demineralisation)"
+    division: DNA
+    hours: 40
+    stage: 4
+    destructive: true
+  latent_print_development:
+    name: "Latent print development (powder / cyanoacrylate / ninhydrin)"
+    division: FINGERPRINT
+    hours: 4
+    stage: 3
+    destructive: false
+  latent_print_comparison:
+    name: "Latent print comparison & AFIS search"
+    division: FINGERPRINT
+    hours: 3
+    stage: 5
+    destructive: false
+    after: [latent_print_development]
+  footwear_comparison:
+    name: "Footwear impression comparison"
+    division: PHYSICS
+    hours: 4
+    stage: 5
+    destructive: false
+  tyre_comparison:
+    name: "Tyre impression comparison"
+    division: PHYSICS
+    hours: 4
+    stage: 5
+    destructive: false
+  toolmark_examination:
+    name: "Tool-mark / cut-mark examination"
+    division: PHYSICS
+    hours: 4
+    stage: 5
+    destructive: false
+  glass_paint_comparison:
+    name: "Glass / paint physical-chemical comparison"
+    division: PHYSICS
+    hours: 6
+    stage: 4
+    destructive: true
+  soil_comparison:
+    name: "Soil comparison"
+    division: PHYSICS
+    hours: 6
+    stage: 4
+    destructive: true
+  fibre_comparison:
+    name: "Fibre comparison (microscopy / FTIR)"
+    division: PHYSICS
+    hours: 5
+    stage: 4
+    destructive: false
+  hair_microscopy:
+    name: "Hair microscopy (root assessment for DNA)"
+    division: SEROLOGY
+    hours: 2
+    stage: 2
+    destructive: false
+  firearm_examination:
+    name: "Firearm examination & test firing"
+    division: BALLISTICS
+    hours: 6
+    stage: 4
+    destructive: false
+  cartridge_comparison:
+    name: "Cartridge case / projectile comparison"
+    division: BALLISTICS
+    hours: 5
+    stage: 5
+    destructive: false
+  gsr_analysis:
+    name: "Gunshot residue analysis"
+    division: BALLISTICS
+    hours: 4
+    stage: 4
+    destructive: true
+  toxicology_screen:
+    name: "Toxicology screening (drugs, pesticides, poisons)"
+    division: TOXICOLOGY
+    hours: 12
+    stage: 4
+    destructive: true
+  volatile_analysis:
+    name: "Volatile analysis (ethanol, cyanide, phosphine — headspace GC)"
+    division: TOXICOLOGY
+    hours: 4
+    stage: 4
+    destructive: true
+  fire_debris_analysis:
+    name: "Fire debris / accelerant identification (GC-MS)"
+    division: CHEMISTRY
+    hours: 8
+    stage: 4
+    destructive: true
+  drug_identification:
+    name: "Narcotic / psychotropic substance identification"
+    division: CHEMISTRY
+    hours: 4
+    stage: 4
+    destructive: true
+  mobile_extraction:
+    name: "Mobile device extraction (logical / physical)"
+    division: CYBER
+    hours: 8
+    stage: 4
+    destructive: false
+  cctv_extraction:
+    name: "CCTV / DVR footage extraction & hash verification"
+    division: CYBER
+    hours: 4
+    stage: 4
+    destructive: false
+  storage_imaging:
+    name: "Storage media forensic imaging & analysis"
+    division: CYBER
+    hours: 10
+    stage: 4
+    destructive: false
+  document_examination:
+    name: "Questioned document examination"
+    division: DOCUMENTS
+    hours: 6
+    stage: 5
+    destructive: false
+
+# =============================================================================
+# FSL network (scalability). A state rarely has one laboratory: the State FSL
+# headquarters is backed by Regional FSLs (RFSLs), and the Central FSL (CFSL)
+# accepts referrals. Pramaan assigns each exhibit (one physical object, so all
+# of its examinations stay together) to the unit where it will be COMPLETED
+# earliest, counting transport time, and compares that with "everything to HQ".
+# Names and capacities are ILLUSTRATIVE — replace with your state's network.
+# `accepts` limits which tiers a unit takes (e.g. CFSL referrals for P1/P2 only).
+# =============================================================================
+network:
+  - id: SFSL-HQ
+    name: "State FSL — headquarters"
+    kind: SFSL
+    transport_h: 2
+    examiners: {SEROLOGY: 2, DNA: 3, TOXICOLOGY: 2, CHEMISTRY: 2, PHYSICS: 2, BALLISTICS: 1, FINGERPRINT: 2, CYBER: 2, DOCUMENTS: 1}
+  - id: RFSL-NORTH
+    name: "Regional FSL — north zone"
+    kind: RFSL
+    transport_h: 5
+    examiners: {SEROLOGY: 1, DNA: 1, TOXICOLOGY: 1, CHEMISTRY: 1, PHYSICS: 1, FINGERPRINT: 1}
+  - id: RFSL-SOUTH
+    name: "Regional FSL — south zone"
+    kind: RFSL
+    transport_h: 6
+    examiners: {SEROLOGY: 1, TOXICOLOGY: 1, CHEMISTRY: 1, FINGERPRINT: 1, CYBER: 1, DOCUMENTS: 1}
+  - id: CFSL
+    name: "Central FSL (referral)"
+    kind: CFSL
+    transport_h: 24
+    accepts: [P1, P2]
+    examiners: {DNA: 2, CYBER: 2, BALLISTICS: 1, DOCUMENTS: 1}

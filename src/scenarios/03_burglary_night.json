@@ -1,0 +1,13 @@
+{
+  "_note": "SYNTHETIC scenario. Property crime: impressions, tool marks and latent prints dominate; DNA from a discarded cigarette butt competes for bench time.",
+  "case_ref": "Cr. No. 1093/2026, PS Kukatpally (synthetic)",
+  "title": "House-breaking by night — rear window entry",
+  "crime_type": "burglary",
+  "incident_time": "2026-09-24T02:00:00+05:30",
+  "reference_time": "2026-09-24T11:00:00+05:30",
+  "scene": {"setting": "indoor", "ambient_temp_c": 27, "weather": "dry"},
+  "accused_in_custody": false,
+  "description": "Ex-B1: broken window glass pieces at the point of entry\nEx-B2: tool marks on the window grill and the almirah latch\nEx-B3: footwear impression in dust on the window sill, not yet lifted\nEx-B4: visible prints on the steel almirah door\nEx-B5: cigarette butt on the bedroom floor\nEx-B6: torn cotton glove near the compound wall\nEx-B7: CCTV of the neighbouring medical shop covering the lane, not yet seized\nEx-B8: empty jewellery boxes thrown in the bathroom\nEx-B9: soil sample from the flower bed below the window",
+  "photo_captions": ["IMG_2201 Ex-B1 point of entry, rear window", "IMG_2204 Ex-B4 almirah door prints", "IMG_2207 Ex-B3 footwear impression on sill with scale"],
+  "expect": {"p1_must_include": ["Ex-B3", "Ex-B7"]}
+}

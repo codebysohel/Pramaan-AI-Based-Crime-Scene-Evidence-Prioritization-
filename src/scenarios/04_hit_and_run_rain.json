@@ -1,0 +1,13 @@
+{
+  "_note": "SYNTHETIC scenario. Rain shrinks field windows for road impressions and washes blood; vehicle-matching trace evidence (glass, paint) becomes decisive.",
+  "case_ref": "Cr. No. 877/2026, PS Gachibowli Traffic (synthetic)",
+  "title": "Hit-and-run at a junction during rain",
+  "crime_type": "hit_and_run",
+  "incident_time": "2026-09-26T21:15:00+05:30",
+  "reference_time": "2026-09-27T07:30:00+05:30",
+  "scene": {"setting": "outdoor", "ambient_temp_c": 24, "weather": "rain"},
+  "accused_in_custody": false,
+  "description": "Ex-H1: headlight glass pieces scattered on the road near the junction\nEx-H2: paint smear on the rear mudguard of the victim's two-wheeler\nEx-H3: tyre marks on the wet road surface, not yet collected\nEx-H4: bloodstains on the road, rain-soaked\nEx-H5: CCTV of the petrol pump facing the junction, not yet seized\nEx-H6: clothing of the injured with paint transfer, collected at the hospital\nEx-H7: suspected car found at a garage with front bumper damage\nEx-H8: broken tail-light pieces from the median",
+  "photo_captions": ["IMG_3301 Ex-H1 glass pieces on road", "IMG_3306 Ex-H2 paint smear close-up with scale"],
+  "expect": {"p1_must_include": ["Ex-H3", "Ex-H5"]}
+}

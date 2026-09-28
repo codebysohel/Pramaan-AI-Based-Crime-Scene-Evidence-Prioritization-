@@ -1,0 +1,129 @@
+# =============================================================================
+# Pramaan knowledge layer 3 — Evidential-quality degradation profiles
+# =============================================================================
+# Model: evidential quality Q(t) = 0.5 ** (t / half_life_hours[condition])
+#   Q = 1.0  -> as good as at deposition
+#   Q < risk_threshold -> "at risk": likely partial/failed results
+#
+# IMPORTANT — these half-lives are CONSERVATIVE PLANNING HEURISTICS chosen to
+# rank relative perishability (e.g. wet swab << dried stain << firearm). They
+# are not measured constants and must be calibrated by FSL subject-matter
+# experts for each deployment. Changing this file changes the knowledge-base
+# hash recorded against every triage run, so results stay reproducible.
+#
+# Conditions:
+#   ambient      shade, 20–30 °C, dry
+#   hot          > 35 °C (common in Indian summers / closed vehicles)
+#   wet          rain-exposed, damp, or sealed wet in plastic
+#   sunlight     direct UV exposure
+#   refrigerated 2–8 °C
+#   frozen       -20 °C
+#   dry_sealed   properly dried and paper-packed (or airtight can for volatiles)
+# =============================================================================
+
+risk_threshold: 0.60
+lab_storage_condition: refrigerated   # assumed once an exhibit is received by the FSL
+
+profiles:
+  dna_stain:
+    ambient: 720
+    hot: 240
+    wet: 48
+    sunlight: 72
+    refrigerated: 4320
+    frozen: 43800
+    dry_sealed: 2160
+  touch_dna:
+    ambient: 336
+    hot: 120
+    wet: 24
+    sunlight: 48
+    refrigerated: 2160
+    frozen: 26280
+    dry_sealed: 1440
+  saliva_item:
+    ambient: 480
+    hot: 168
+    wet: 36
+    sunlight: 72
+    refrigerated: 4320
+    frozen: 43800
+    dry_sealed: 2160
+  sexual_assault_kit:
+    ambient: 72
+    hot: 36
+    wet: 24
+    sunlight: 24
+    refrigerated: 2160
+    frozen: 43800
+    dry_sealed: 1440
+  hair:
+    ambient: 4320
+    hot: 2160
+    wet: 720
+    sunlight: 1440
+    refrigerated: 8760
+    frozen: 87600
+    dry_sealed: 8760
+  bone:
+    ambient: 8760
+    hot: 4320
+    wet: 2160
+    sunlight: 4320
+    refrigerated: 26280
+    frozen: 87600
+    dry_sealed: 17520
+  latent_print:
+    ambient: 336
+    hot: 96
+    wet: 12
+    sunlight: 48
+    refrigerated: 2160
+    frozen: 8760
+    dry_sealed: 1440
+  viscera:
+    ambient: 72
+    hot: 36
+    wet: 72
+    sunlight: 36
+    refrigerated: 720
+    frozen: 8760
+    dry_sealed: 72
+  volatile_tox:
+    ambient: 24
+    hot: 12
+    wet: 24
+    sunlight: 12
+    refrigerated: 336
+    frozen: 2160
+    dry_sealed: 48
+  fire_debris:
+    ambient: 72
+    hot: 24
+    wet: 96
+    sunlight: 24
+    refrigerated: 720
+    frozen: 4320
+    dry_sealed: 4320
+  stable:
+    ambient: 100000
+    hot: 100000
+    wet: 100000
+    sunlight: 100000
+    refrigerated: 100000
+    frozen: 100000
+    dry_sealed: 100000
+
+# Better storage options to suggest, in order of preference, per profile.
+preservation_advice:
+  dna_stain: [dry_sealed, refrigerated, frozen]
+  touch_dna: [dry_sealed, refrigerated]
+  saliva_item: [dry_sealed, refrigerated, frozen]
+  sexual_assault_kit: [refrigerated, frozen]
+  hair: [dry_sealed]
+  bone: [dry_sealed]
+  latent_print: [dry_sealed]
+  viscera: [refrigerated, frozen]
+  volatile_tox: [refrigerated, frozen]
+  fire_debris: [dry_sealed, refrigerated]
+  stable: []

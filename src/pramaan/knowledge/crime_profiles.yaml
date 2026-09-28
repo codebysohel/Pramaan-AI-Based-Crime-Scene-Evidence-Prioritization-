@@ -1,0 +1,202 @@
+# =============================================================================
+# Pramaan knowledge layer 4 — Crime-type profiles
+# =============================================================================
+# relevance        -> how much each evidence CATEGORY usually answers the key
+#                     questions for this crime type (0..1). Unlisted = 0.4.
+# weights          -> blend of probative value / urgency / irreplaceability in
+#                     the Evidentiary Priority Index (EPI). Must sum to 1.
+# max_punishment_years -> default used to compute the BNSS §187(3) custody
+#                     window (90 days if >= 10 years / life / death, else 60).
+#                     99 means "death or life imprisonment". The IO should
+#                     override per the actual sections charged.
+# gaps             -> "expected but missing" checks. An alert fires when NO
+#                     listed exhibit matches missing_any_type / missing_any_category,
+#                     optionally only when some category is present or the
+#                     scene setting matches.
+# =============================================================================
+
+default_weights: {probative: 0.55, urgency: 0.30, irreplaceable: 0.15}
+
+common_gaps:
+  - id: reference_samples
+    severity: high
+    missing_any_type: [reference_blood]
+    only_if_category_present: [biological, clothing, weapon]
+    message: "DNA-bearing exhibits are listed but no reference samples. Scene profiles cannot be compared to victim or suspects without them."
+    action: "Collect reference blood/buccal samples (victim post-mortem; each suspect with consent or court order) and send with the same forwarding letter."
+  - id: scene_litter_sweep
+    severity: high
+    missing_any_type: [cigarette_butt, drinking_vessel, litter_wrapper]
+    only_if_setting: [outdoor]
+    message: "No scene litter listed for an outdoor scene. Cigarette/beedi butts, bottles and wrappers within ~50 m are frequent sources of offender saliva or touch DNA — and are the first things lost to cleaning, rain and traffic."
+    action: "Grid-search a 50 m radius around the body/point of offence before the scene is released; photograph in situ, then package each item separately."
+  - id: cctv_canvass
+    severity: medium
+    missing_any_category: [digital]
+    message: "No CCTV or mobile devices listed. DVR footage is typically overwritten within 7–30 days."
+    action: "Canvass cameras on all approach routes (shops, toll plazas, fuel stations, ATMs) today; seize DVR or export native files with hash values."
+
+profiles:
+  homicide:
+    label: "Homicide / suspicious death"
+    max_punishment_years: 99
+    key_questions: ["Who is the deceased?", "Who was present?", "What caused death?", "When and where did it happen?"]
+    relevance: {biological: 1.0, reference: 0.8, clothing: 0.9, trace: 0.7, impression: 0.8, weapon: 1.0,
+                firearm: 1.0, toxicology: 0.8, chemical: 0.8, digital: 0.85, document: 0.6, vehicle: 0.7, other: 0.4}
+    gaps:
+      - id: fingernail_scrapings
+        severity: medium
+        missing_any_type: [fingernail_scrapings]
+        message: "No fingernail scrapings/clippings from the deceased. If there was a struggle, they may hold the assailant's DNA."
+        action: "Request the autopsy surgeon to collect scrapings from each hand separately."
+      - id: victim_clothing
+        severity: medium
+        missing_any_category: [clothing]
+        message: "No clothing listed. Garments carry transfer evidence (blood, fibres, soil) and cut/tear damage matching the weapon."
+        action: "Collect the deceased's clothing at autopsy, air-dry and pack each garment separately."
+      - id: viscera_for_unclear_cause
+        severity: low
+        missing_any_type: [viscera]
+        message: "No viscera listed. If the cause of death is not obvious, poisoning or intoxication cannot be assessed later."
+        action: "Ask the autopsy surgeon to preserve viscera (and blood without preservative for alcohol) when the cause is unclear."
+
+  sexual_assault:
+    label: "Sexual assault"
+    max_punishment_years: 99
+    key_questions: ["Did sexual contact occur?", "Who was the contributor?", "Were drugs used?", "Where and when?"]
+    relevance: {biological: 1.0, reference: 0.9, clothing: 1.0, trace: 0.75, impression: 0.5, weapon: 0.6,
+                firearm: 0.5, toxicology: 0.75, chemical: 0.5, digital: 0.8, document: 0.4, vehicle: 0.7, other: 0.4}
+    weights: {probative: 0.50, urgency: 0.35, irreplaceable: 0.15}
+    gaps:
+      - id: medico_legal_kit
+        severity: critical
+        missing_any_type: [sexual_assault_kit]
+        message: "No medico-legal sample kit listed. BNSS §184 requires medical examination of the survivor, including samples for DNA profiling."
+        action: "Ensure the registered medical practitioner's sealed kit is collected and forwarded without delay under cold chain."
+      - id: dfsa_toxicology
+        severity: medium
+        missing_any_type: [body_fluid_tox]
+        message: "No blood/urine for toxicology. If drug-facilitated assault is possible, the detection window is hours to a few days."
+        action: "Request blood (sodium fluoride) and urine collection with recorded times, if within the window."
+      - id: survivor_clothing
+        severity: high
+        missing_any_category: [clothing]
+        message: "No clothing or bedding listed."
+        action: "Collect garments worn at the time and bedding, each in separate paper bags."
+
+  burglary:
+    label: "House-breaking / burglary / theft"
+    max_punishment_years: 7
+    key_questions: ["How was entry made?", "Who entered?", "What was taken?"]
+    relevance: {biological: 0.6, reference: 0.5, clothing: 0.5, trace: 0.8, impression: 1.0, weapon: 0.4,
+                firearm: 0.6, toxicology: 0.2, chemical: 0.3, digital: 0.85, document: 0.4, vehicle: 0.5, other: 0.4}
+    gaps:
+      - id: entry_prints
+        severity: high
+        missing_any_type: [latent_print_surface, tool_marks]
+        message: "Neither latent prints nor tool marks are listed for the point of entry."
+        action: "Have the fingerprint bureau process the entry point, cupboards and handled items; seize forced locks/latches."
+      - id: elimination_prints
+        severity: low
+        missing_any_type: [reference_blood]
+        message: "Remember elimination fingerprints of residents and first responders so that scene prints can be excluded."
+        action: "Record elimination prints on the day of the scene visit."
+
+  arson:
+    label: "Arson / death by burning"
+    max_punishment_years: 99
+    key_questions: ["Was the fire deliberate?", "What accelerant?", "Who set it?", "Identity of any deceased?"]
+    relevance: {biological: 0.8, reference: 0.8, clothing: 0.7, trace: 0.6, impression: 0.6, weapon: 0.5,
+                firearm: 0.4, toxicology: 0.6, chemical: 1.0, digital: 0.85, document: 0.4, vehicle: 0.6, other: 0.4}
+    weights: {probative: 0.50, urgency: 0.35, irreplaceable: 0.15}
+    gaps:
+      - id: fire_debris
+        severity: high
+        missing_any_type: [fire_debris]
+        message: "No fire debris listed. Accelerant residues evaporate within hours to days."
+        action: "Collect debris from low points of burn patterns into airtight cans, plus an unburnt control sample."
+
+  hit_and_run:
+    label: "Hit-and-run / fatal road incident"
+    max_punishment_years: 10
+    key_questions: ["Which vehicle?", "Who was driving?", "Speed and direction?"]
+    relevance: {biological: 0.7, reference: 0.6, clothing: 0.8, trace: 1.0, impression: 0.9, weapon: 0.3,
+                firearm: 0.3, toxicology: 0.7, chemical: 0.4, digital: 0.95, document: 0.3, vehicle: 1.0, other: 0.4}
+    gaps:
+      - id: vehicle_trace
+        severity: high
+        missing_any_type: [paint_transfer, glass_fragments]
+        message: "No paint or glass fragments listed. These often identify the make and colour of the vehicle."
+        action: "Collect all glass/plastic/paint debris at the impact point and from the victim's clothing."
+      - id: tyre_marks
+        severity: medium
+        missing_any_type: [tyre_impression]
+        only_if_setting: [outdoor]
+        message: "No tyre/skid marks listed."
+        action: "Photograph and measure skid marks and tyre impressions before traffic resumes."
+
+  poisoning:
+    label: "Suspected poisoning"
+    max_punishment_years: 99
+    key_questions: ["What substance?", "How much?", "Who had access and opportunity?"]
+    relevance: {biological: 0.5, reference: 0.5, clothing: 0.4, trace: 0.4, impression: 0.4, weapon: 0.2,
+                firearm: 0.2, toxicology: 1.0, chemical: 0.9, digital: 0.75, document: 0.7, vehicle: 0.3, other: 0.4}
+    weights: {probative: 0.45, urgency: 0.40, irreplaceable: 0.15}
+    gaps:
+      - id: viscera
+        severity: critical
+        missing_any_type: [viscera, body_fluid_tox]
+        message: "No viscera or body fluids listed — toxicology is the core of a poisoning case."
+        action: "Ensure viscera (and blood without preservative) are preserved at autopsy or hospital and forwarded under cold chain."
+      - id: food_vomit
+        severity: medium
+        missing_any_type: [drinking_vessel, poison_container]
+        message: "No food/drink remnants or containers listed."
+        action: "Seize utensils, glasses, food remnants and any containers found near the victim."
+
+  firearm_offence:
+    label: "Firearm offence / shooting"
+    max_punishment_years: 99
+    key_questions: ["Which weapon?", "Who fired?", "From where?"]
+    relevance: {biological: 0.8, reference: 0.7, clothing: 0.8, trace: 0.5, impression: 0.6, weapon: 0.6,
+                firearm: 1.0, toxicology: 0.3, chemical: 0.4, digital: 0.85, document: 0.3, vehicle: 0.6, other: 0.4}
+    gaps:
+      - id: gsr
+        severity: high
+        missing_any_type: [gsr_kit]
+        message: "No GSR kits listed. GSR on hands is largely lost within about 4–6 hours or on washing."
+        action: "Collect GSR from suspects' hands immediately on apprehension; seize their outer clothing."
+      - id: ammunition
+        severity: medium
+        missing_any_type: [cartridge_case, projectile]
+        message: "No cartridge cases or projectiles listed."
+        action: "Search scene systematically (including under vehicles and drains); request projectile retrieval at autopsy."
+
+  robbery:
+    label: "Robbery / chain or phone snatching"
+    max_punishment_years: 10
+    key_questions: ["Who were the offenders?", "Route of escape?", "Vehicle used?"]
+    relevance: {biological: 0.6, reference: 0.5, clothing: 0.6, trace: 0.5, impression: 0.7, weapon: 0.8,
+                firearm: 0.9, toxicology: 0.2, chemical: 0.3, digital: 1.0, document: 0.3, vehicle: 0.8, other: 0.4}
+
+  kidnapping:
+    label: "Kidnapping / missing person"
+    max_punishment_years: 10
+    key_questions: ["Where is the person?", "Who is involved?", "Which route and vehicle?"]
+    relevance: {biological: 0.7, reference: 0.8, clothing: 0.7, trace: 0.5, impression: 0.6, weapon: 0.5,
+                firearm: 0.6, toxicology: 0.4, chemical: 0.3, digital: 1.0, document: 0.7, vehicle: 0.85, other: 0.4}
+    weights: {probative: 0.45, urgency: 0.40, irreplaceable: 0.15}
+
+  ndps:
+    label: "Narcotics (NDPS) seizure"
+    max_punishment_years: 10
+    key_questions: ["What substance and quantity?", "Who possessed it?", "Supply chain?"]
+    relevance: {biological: 0.3, reference: 0.3, clothing: 0.3, trace: 0.3, impression: 0.4, weapon: 0.3,
+                firearm: 0.6, toxicology: 0.5, chemical: 1.0, digital: 0.85, document: 0.6, vehicle: 0.5, other: 0.4}
+
+  cyber_fraud:
+    label: "Cyber / financial fraud"
+    max_punishment_years: 7
+    key_questions: ["Which devices and accounts?", "Money trail?", "Who operated them?"]
+    relevance: {biological: 0.2, reference: 0.2, clothing: 0.2, trace: 0.2, impression: 0.3, weapon: 0.2,
+                firearm: 0.2, toxicology: 0.1, chemical: 0.1, digital: 1.0, document: 0.85, vehicle: 0.2, other: 0.4}

@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=8.0
+# optional: regenerate demo screenshots / video (python scripts/capture_demo.py)
+playwright>=1.45
